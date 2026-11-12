@@ -56,14 +56,14 @@ export function ProductFilters({ categories, totalCount }: ProductFiltersProps) 
 
   const pill = (active: boolean) =>
     cn(
-      'whitespace-nowrap rounded-full border px-5 py-2.5 text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold',
+      'whitespace-nowrap rounded-full border px-3.5 py-2 text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold sm:px-5 sm:py-2.5',
       active
         ? 'border-forest bg-forest text-cream shadow-md'
         : 'border-sage/30 bg-white text-forest hover:bg-sage/10',
     );
 
   return (
-    <div className="space-y-4">
+    <div className="w-full min-w-0 space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <label className="relative block flex-1">
           <span className="sr-only">Search produce</span>
@@ -88,7 +88,7 @@ export function ProductFilters({ categories, totalCount }: ProductFiltersProps) 
         </label>
 
         <label className="flex items-center gap-2 text-xs font-semibold text-forest/70">
-          Sort by
+          <span className="shrink-0">Sort by</span>
           <select
             value={sort}
             onChange={(event) =>
@@ -98,7 +98,7 @@ export function ProductFilters({ categories, totalCount }: ProductFiltersProps) 
                 }),
               )
             }
-            className="rounded-full border border-sage/30 bg-white px-4 py-3 text-sm font-medium text-forest outline-none focus:border-forest focus:ring-2 focus:ring-forest/10"
+            className="w-full rounded-full border border-sage/30 bg-white px-4 py-3 text-sm font-medium text-forest outline-none focus:border-forest focus:ring-2 focus:ring-forest/10 sm:w-auto"
           >
             {SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -109,8 +109,8 @@ export function ProductFilters({ categories, totalCount }: ProductFiltersProps) 
         </label>
       </div>
 
-      <div className="flex items-center gap-3">
-        <nav aria-label="Product categories" className="scrollbar-none flex flex-1 items-center gap-2.5 overflow-x-auto pb-1">
+      <div className="flex items-start justify-between gap-2">
+        <nav aria-label="Product categories" className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <Link href={buildUrl({ category: null })} scroll={false} replace className={pill(!activeCategory)}>
             All produce ({totalCount})
           </Link>
@@ -126,9 +126,11 @@ export function ProductFilters({ categories, totalCount }: ProductFiltersProps) 
             </Link>
           ))}
         </nav>
-        <span role="status" aria-live="polite" className="flex w-5 shrink-0 justify-center">
-          {isPending && <Loader2 className="h-4 w-4 animate-spin text-sage" aria-label="Updating results" />}
-        </span>
+        {isPending && (
+          <span role="status" aria-live="polite" className="mt-2 flex w-5 shrink-0 justify-center">
+            <Loader2 className="h-4 w-4 animate-spin text-sage" aria-label="Updating results" />
+          </span>
+        )}
       </div>
     </div>
   );

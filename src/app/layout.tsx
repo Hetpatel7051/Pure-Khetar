@@ -36,8 +36,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${plusJakartaSans.variable}`}>
-      <body className="flex min-h-screen flex-col bg-cream font-sans text-forest antialiased selection:bg-marigold selection:text-white">
+    <html lang="en" className={`${fraunces.variable} ${plusJakartaSans.variable} overflow-x-hidden`}>
+      <body className="flex min-h-screen w-full flex-col overflow-x-hidden bg-cream font-sans text-forest antialiased selection:bg-marigold selection:text-white">
         <a
           href="#main"
           className="sr-only z-[100] rounded-full bg-forest px-5 py-3 text-sm font-bold text-cream focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
@@ -46,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <StoreProvider>
           <Navbar />
-          <main id="main" className="flex-1">
+          <main id="main" className="w-full flex-1 overflow-x-hidden">
             {children}
           </main>
           <Footer />
