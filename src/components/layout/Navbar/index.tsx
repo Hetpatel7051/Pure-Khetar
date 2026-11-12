@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'framer-motion';
 import { Menu, Search, ShoppingBag } from 'lucide-react';
-import { Container } from '../Container';
 import { Logo } from '../Logo';
 import { NavLinks } from '../NavLinks';
 import { UserMenu } from '../UserMenu';
