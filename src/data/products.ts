@@ -1,0 +1,69 @@
+/**
+ * Products written to the database by `npm run db:seed`.
+ * Prices reflect current Gujarat market rates (Oct 2026).
+ * Each product includes real farm images from Kamana farm.
+ */
+export const SEED_PRODUCTS = [
+  {
+    slug: 'natural-ringan',
+    name: 'કુદરતી રીંગણ (Graffiti Eggplant)',
+    description:
+      'Tender, pesticide-free local Ringan grown under traditional net-house farming at Kamana. Harvested at sunrise for peak freshness.',
+    price: 75,
+    unit: 'kg',
+    stock: 120,
+    images: [
+      '/images/products/Beautiful.jpg',
+      '/images/products/brinjal.jpg',
+      '/images/products/ringan.jpeg',
+      '/images/farm/baby-eggplant.jpeg',
+      '/images/products/r2.jpeg'
+    ],
+    isChemicalFree: true,
+    isFeatured: true,
+    categorySlug: 'fruiting',
+  },
+  {
+    slug: 'natural-deti',
+    name: 'Natural Deti',
+    description: 'Fresh, naturally grown Deti vegetables harvested from our Kamana family farm.',
+    price: 80,
+    unit: 'kg',
+    stock: 100,
+    images: ['/images/farm/deti-poster.jpg'],
+    isChemicalFree: true,
+    isFeatured: true,
+    categorySlug: 'vegetables',
+  },
+  {
+    slug: 'fresh-fulawar',
+    name: 'Fresh Natural Fulawar (Cauliflower)',
+    description:
+      'Crisp, snow-white natural cauliflower harvested at sunrise by Sureshbhai and team. No pesticides, no chemicals — just pure Vedic farming. Market rate: ₹50–80/pc.',
+    price: 75,
+    unit: 'kg',
+    stock: 85,
+    images: ['/images/products/fulawar.jpeg', '/images/products/fulawarPlant.jpeg'],
+    isChemicalFree: true,
+    isFeatured: true,
+    categorySlug: 'vegetables',
+  },
+  {
+    slug: 'natural-papaya',
+    name: 'Natural Papaya (Papita)',
+    description:
+      'Sweet, sun-ripened natural papaya from our Kamana farm. Rich in enzymes and grown with A2 Vedic manure — zero synthetic inputs. Coming soon.',
+    price: 55,
+    unit: 'kg',
+    stock: 60,
+    images: [
+      '/images/products/papaya.jpeg',
+      '/images/products/papaya2.jpeg',
+      '/images/products/papaya3.jpeg',
+      '/images/products/papaya3.jpeg',
+    ],
+    isChemicalFree: true,
+    isFeatured: true,
+    categorySlug: 'fruits',
+  },
+] as const;

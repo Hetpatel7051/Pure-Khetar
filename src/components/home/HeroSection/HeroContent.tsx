@@ -1,0 +1,86 @@
+'use client';
+
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ArrowRight, ShieldCheck, Truck, Sprout, Leaf, Star, Clock } from 'lucide-react';
+import { fadeUp } from './FloatingCards';
+
+const TRUST_PROPS = [
+  { icon: <ShieldCheck className="w-4 h-4 text-marigold" />, text: '0% Chemicals & Pesticides' },
+  { icon: <Truck className="w-4 h-4 text-marigold" />, text: 'Morning Harvest Delivery' },
+  { icon: <Star className="w-4 h-4 text-marigold" />, text: '50+ Yrs Farming Legacy' },
+  { icon: <Clock className="w-4 h-4 text-marigold" />, text: 'Harvested by 6 AM Daily' },
+];
+
+export function HeroContent() {
+  return (
+    <div className="max-w-[640px] space-y-7">
+      {/* Glowing badge */}
+      <motion.div {...fadeUp(0)}>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-md border border-sage/20 text-forest text-xs font-bold uppercase tracking-widest shadow-card">
+          <motion.span
+            animate={{ rotate: [0, 15, -15, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <Sprout className="w-3.5 h-3.5" />
+          </motion.span>
+          <span>Kamana Farm · Est. 1972 · Gujarat</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-marigold animate-pulse-ring" />
+        </div>
+      </motion.div>
+
+      {/* Headline */}
+      <motion.h1
+        {...fadeUp(0.15)}
+        className="font-serif text-[2rem] sm:text-[2.75rem] lg:text-[3.25rem] font-bold text-forest leading-[1.08] drop-shadow-sm"
+      >
+        ROOTED IN NATURE,
+        <br />
+        <span className="text-sage">CULTIVATED WITH CARE.</span>
+      </motion.h1>
+
+      {/* Subtitle */}
+      <motion.p {...fadeUp(0.3)} className="text-base sm:text-lg text-forest/75 leading-relaxed font-light max-w-lg">
+        Nourished with Vedic manure and harvested daily at sunrise.
+        Delivered straight to your doorstep — guaranteed purity, every morning.
+      </motion.p>
+
+      {/* Action Buttons */}
+      <motion.div {...fadeUp(0.45)} className="flex flex-wrap items-center gap-3 pt-1">
+        <Link
+          href="/shop"
+          className="group inline-flex items-center gap-2 bg-marigold text-forest px-7 py-4 rounded-full font-bold text-sm shadow-glow-gold hover:bg-white hover:shadow-natural-lg transition-all duration-300 hover:-translate-y-0.5"
+        >
+          <Leaf className="w-4 h-4" />
+          <span>Explore Fresh Produce</span>
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+        </Link>
+
+        {/* High-contrast secondary button with dark shadow and clean hover */}
+        <Link
+          href="/our-farm"
+          className="inline-flex items-center gap-2 bg-white/90 border border-forest/20 text-forest px-7 py-4 rounded-full font-bold text-sm shadow-[0_4px_16px_rgba(31,77,46,0.14)] backdrop-blur-md hover:bg-forest hover:text-cream hover:border-forest hover:shadow-[0_8px_24px_rgba(31,77,46,0.25)] hover:-translate-y-0.5 transition-all duration-300"
+        >
+          <span>Our Farm Story</span>
+        </Link>
+      </motion.div>
+
+      {/* Trust Props Strip */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.65 }}
+        className="pt-7 border-t border-forest/15"
+      >
+        <div className="grid grid-cols-2 gap-2 text-xs text-forest sm:grid-cols-4 sm:gap-3">
+          {TRUST_PROPS.map(({ icon, text }) => (
+            <div key={text} className="flex items-center gap-2 rounded-md border border-white/70 bg-white/85 px-2.5 py-2 shadow-[0_2px_12px_rgba(31,77,46,0.08)] backdrop-blur-sm">
+              {icon}
+              <span className="font-medium">{text}</span>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}

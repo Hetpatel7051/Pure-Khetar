@@ -1,0 +1,22 @@
+/** Categories written to the database by `npm run db:seed`. */
+export const SEED_CATEGORIES = [
+  {
+    slug: 'vegetables',
+    name: 'Fresh Vegetables',
+    description: 'Harvested daily from our Kamana natural plots.',
+    image: '/images/products/fulawar.jpeg',
+  },
+  {
+    slug: 'fruiting',
+    name: 'Fruiting Veggies',
+    description: 'Vine-ripened 100% chemical-free & pesticide-free vegetables.',
+    image: '/images/products/ringan.jpeg',
+  },
+  {
+    slug: 'fruits',
+    name: 'Fresh Fruits',
+    description: 'Sun-ripened 100% chemical-free & pesticide-free fruits from the Kamana farm.',
+    image: '/images/products/papaya.jpeg',
+  },
+] as const;
+
