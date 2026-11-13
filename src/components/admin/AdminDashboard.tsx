@@ -22,6 +22,7 @@ import {
   Search,
   ShoppingBag,
   Sparkles,
+  Star,
   Trash2,
   X,
 } from 'lucide-react';
@@ -674,7 +675,13 @@ function ProductModal({
 }) {
   const [name, setName] = useState(product.name);
   const [slug, setSlug] = useState(product.slug);
-  const [images, setImages] = useState(product.images.join(','));
+  const [imagesList, setImagesList] = useState<string[]>(() => {
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      return [...product.images];
+    }
+    return [];
+  });
+  const [manualUrl, setManualUrl] = useState('');
   const [imageBusy, setImageBusy] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
 
@@ -689,27 +696,41 @@ function ProductModal({
     }
   };
 
-  async function uploadImage(file: File) {
+  async function uploadFiles(files: FileList | File[]) {
+    const fileArray = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (fileArray.length === 0) return;
+
     setImageBusy(true);
-    setUploadStatus(`Preparing ${file.name}...`);
+    setUploadStatus(`Preparing ${fileArray.length} photo(s)...`);
+    const uploadedUrls: string[] = [];
+
     try {
-      const preparedFile = await compressImageIfNeeded(file);
-      setUploadStatus(`Uploading ${file.name}...`);
-      const form = new FormData();
-      form.set('file', preparedFile);
-      const response = await fetch('/api/admin/products/upload', { method: 'POST', body: form });
-      const data = await response.json().catch(() => ({}));
-      if (response.ok && data.url) {
-        // Place new image at the front as primary
-        setImages(data.url);
-        setUploadStatus('Photo uploaded! Click "Save Vegetable" below to save changes.');
+      for (let i = 0; i < fileArray.length; i++) {
+        const file = fileArray[i];
+        setUploadStatus(`Uploading ${i + 1}/${fileArray.length}: ${file.name}...`);
+        const prepared = await compressImageIfNeeded(file);
+        const form = new FormData();
+        form.set('file', prepared);
+        const res = await fetch('/api/admin/products/upload', { method: 'POST', body: form });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.url) {
+          uploadedUrls.push(data.url);
+        } else {
+          alert(`Failed to upload ${file.name}: ${data.error || res.statusText}`);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setImagesList((prev) => [...prev, ...uploadedUrls]);
+        setUploadStatus(
+          `${uploadedUrls.length} photo(s) added! Click "Save Vegetable" below to save your changes.`,
+        );
       } else {
         setUploadStatus(null);
-        alert(data.error || `Image upload failed (${response.status})`);
       }
     } catch {
       setUploadStatus(null);
-      alert('Network error while uploading image.');
+      alert('Network error while uploading photo(s).');
     } finally {
       setImageBusy(false);
     }
@@ -726,8 +747,8 @@ function ProductModal({
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok && data.url) {
-        setImages(data.url);
-        setUploadStatus('AI image generated! Click "Save Vegetable" below to save changes.');
+        setImagesList((prev) => [...prev, data.url]);
+        setUploadStatus('AI image generated and added! Click "Save Vegetable" below to save changes.');
       } else {
         setUploadStatus(null);
         alert(data.error || `AI image generation failed (${response.status})`);
@@ -738,6 +759,26 @@ function ProductModal({
     } finally {
       setImageBusy(false);
     }
+  }
+
+  function makePrimary(index: number) {
+    if (index === 0) return;
+    setImagesList((prev) => {
+      const updated = [...prev];
+      const [item] = updated.splice(index, 1);
+      return [item, ...updated];
+    });
+  }
+
+  function removeImage(index: number) {
+    setImagesList((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function addManualUrl() {
+    const trimmed = manualUrl.trim();
+    if (!trimmed) return;
+    setImagesList((prev) => [...prev, trimmed]);
+    setManualUrl('');
   }
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -751,7 +792,7 @@ function ProductModal({
       categoryId: String(f.get('categoryId')),
       available: f.get('available') === 'on',
       comingSoon: f.get('comingSoon') === 'on',
-      images: parseImagesInput(images),
+      images: imagesList,
     };
     const response = await fetch(product.id ? `/api/admin/products/${product.id}` : '/api/admin/products', {
       method: product.id ? 'PATCH' : 'POST',
@@ -766,8 +807,6 @@ function ProductModal({
       alert(result?.error || 'Unable to save vegetable');
     }
   }
-
-  const previewUrl = parseImagesInput(images)[0];
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-forest/45 p-4 backdrop-blur-sm">
@@ -837,18 +876,72 @@ function ProductModal({
           </label>
 
           <div className="sm:col-span-2">
-            <p className="text-sm font-semibold text-forest">Product Image</p>
-            {previewUrl && (
-              <div className="relative mt-2 h-32 w-full overflow-hidden rounded-2xl border border-sage/20 bg-cream">
-                {previewUrl.startsWith('data:') ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={previewUrl} alt={name || 'Preview'} className="h-full w-full object-cover" />
-                ) : (
-                  <SmartImage src={previewUrl} alt={name || 'Preview'} fill sizes="400px" className="object-cover" />
-                )}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-forest">Product Photos ({imagesList.length})</p>
+                <p className="text-xs text-forest/55">
+                  The first photo is the main card image. You can upload multiple photos.
+                </p>
+              </div>
+            </div>
+
+            {/* Gallery Grid */}
+            {imagesList.length > 0 ? (
+              <div className="mt-3 grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+                {imagesList.map((url, idx) => (
+                  <div
+                    key={`${url}-${idx}`}
+                    className={cn(
+                      'group relative aspect-square overflow-hidden rounded-2xl border bg-cream shadow-sm',
+                      idx === 0 ? 'border-2 border-forest ring-2 ring-forest/20' : 'border-sage/20',
+                    )}
+                  >
+                    {url.startsWith('data:') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={url} alt={`Photo ${idx + 1}`} className="h-full w-full object-cover" />
+                    ) : (
+                      <SmartImage src={url} alt={`Photo ${idx + 1}`} fill sizes="160px" className="object-cover" />
+                    )}
+
+                    {/* Main photo badge */}
+                    {idx === 0 ? (
+                      <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-md bg-forest px-1.5 py-0.5 text-[10px] font-bold text-cream shadow">
+                        <Star className="h-3 w-3 fill-marigold text-marigold" />
+                        Main
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => makePrimary(idx)}
+                        className="absolute left-1.5 top-1.5 hidden rounded-md bg-white/95 px-1.5 py-0.5 text-[10px] font-bold text-forest shadow backdrop-blur transition hover:bg-forest hover:text-white group-hover:flex"
+                        title="Set as main display photo"
+                      >
+                        Set Main
+                      </button>
+                    )}
+
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 text-white opacity-85 shadow transition hover:scale-110 hover:opacity-100 group-hover:opacity-100"
+                      title="Remove this photo"
+                      aria-label="Remove photo"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-3 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-sage/30 bg-cream/40 p-6 text-center">
+                <p className="text-xs font-semibold text-forest/70">No photos added yet.</p>
+                <p className="mt-0.5 text-[11px] text-forest/45">Upload one or more photos below.</p>
               </div>
             )}
-            <div className="mt-2.5 flex flex-col gap-2 sm:flex-row">
+
+            {/* Action buttons */}
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <label
                 className={cn(
                   'flex min-h-10 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-sage/25 px-4 text-xs font-bold text-forest transition hover:bg-cream',
@@ -856,16 +949,17 @@ function ProductModal({
                 )}
               >
                 {imageBusy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {imageBusy ? 'Uploading...' : 'Upload photo'}
+                {imageBusy ? 'Uploading...' : 'Upload photo(s)'}
                 <input
                   type="file"
+                  multiple
                   accept="image/*"
                   disabled={imageBusy}
                   className="hidden"
                   onChange={(event) => {
-                    const file = event.target.files?.[0];
+                    const files = event.target.files;
+                    if (files && files.length > 0) void uploadFiles(files);
                     event.target.value = '';
-                    if (file) void uploadImage(file);
                   }}
                 />
               </label>
@@ -879,16 +973,35 @@ function ProductModal({
                 {imageBusy ? 'Generating...' : 'Generate with Gemini'}
               </button>
             </div>
+
             {uploadStatus && (
               <p className="mt-2 text-xs font-semibold text-emerald-700">{uploadStatus}</p>
             )}
-            <input
-              name="images"
-              value={images}
-              onChange={(e) => setImages(e.target.value)}
-              placeholder="Image URL"
-              className="mt-2.5 min-h-10 w-full rounded-xl border border-sage/25 px-3.5 text-xs outline-none focus:border-forest"
-            />
+
+            {/* Manual URL add */}
+            <div className="mt-2.5 flex gap-2">
+              <input
+                type="text"
+                value={manualUrl}
+                onChange={(e) => setManualUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addManualUrl();
+                  }
+                }}
+                placeholder="Or paste an image URL and click Add"
+                className="min-h-10 flex-1 rounded-xl border border-sage/25 px-3.5 text-xs outline-none focus:border-forest"
+              />
+              <button
+                type="button"
+                onClick={addManualUrl}
+                disabled={!manualUrl.trim()}
+                className="min-h-10 rounded-xl border border-sage/25 bg-cream/70 px-3.5 text-xs font-bold text-forest transition hover:bg-forest hover:text-white disabled:opacity-40"
+              >
+                Add URL
+              </button>
+            </div>
           </div>
 
           <label className="flex items-center gap-2 text-sm font-semibold text-forest">
