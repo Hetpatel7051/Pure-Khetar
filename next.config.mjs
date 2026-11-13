@@ -4,6 +4,13 @@ const nextConfig = {
   poweredByHeader: false,
   images: {
     formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
   },
   async redirects() {
     // "About" and "Our Journey" are one page — real HTTP 308 so search engines follow it.
