@@ -9,6 +9,8 @@ const PROTECTED_PREFIXES = ['/account', '/checkout', '/admin'];
 const AUTH_PAGES = ['/login', '/register'];
 
 export const authConfig = {
+  trustHost: true,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   pages: { signIn: '/login' },
   session: { strategy: 'jwt', maxAge: 60 * 60 * 24 * 30 },
   providers: [],
