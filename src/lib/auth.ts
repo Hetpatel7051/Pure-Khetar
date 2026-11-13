@@ -13,6 +13,8 @@ const DUMMY_HASH = '$2b$12$C8aobiWqPyAPRK1Pg/Xm1.VPNTLCkqlFU.NwQC7JGtFHRzWHfmnli
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  trustHost: true,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   providers: [
     Credentials({
       credentials: { email: {}, password: {} },
